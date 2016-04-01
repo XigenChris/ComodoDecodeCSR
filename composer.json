@@ -1,0 +1,22 @@
+{
+    "name": "xigen/comodo-decode-csr",
+    "authors": [
+        {
+            "name": "Chris Hilsdon",
+            "email": "chrish@xigen.co.uk"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^6.2"
+    },
+    "autoload" : {
+        "psr-4" : {
+            "Xigen\\" : "src"
+        }
+    },
+    "autoload-dev" : {
+        "psr-4" : {
+            "Xigen\\Tests\\" : "tests"
+        }
+    }
+}
