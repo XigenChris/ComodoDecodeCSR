@@ -36,6 +36,11 @@ class ComodoDecodeCSR
         $this->Form['csr'] = $CSR;
     }
 
+    public function getCSR()
+    {
+        return $this->CSR;
+    }
+
     public function getHashes()
     {
         $client = new Client();
@@ -51,7 +56,7 @@ class ComodoDecodeCSR
     {
         $Responce = $this->request->getBody();
         $lines = explode("\n", $Responce);
-        
+
         foreach ($lines as $v) {
             if (!empty($v)) {
                 $value = explode("=", $v);
