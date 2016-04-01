@@ -8,6 +8,8 @@ use GuzzleHttp\Client;
 
 class ComodoDecodeCSR
 {
+    protected $md5;
+    protected $sha1;
     protected $Endpoint = "https://secure.comodo.net/products/!decodeCSR";
     protected $Form = [
         'responseFormat' => 'N',
@@ -56,6 +58,7 @@ class ComodoDecodeCSR
     {
         $Responce = $this->request->getBody();
         $lines = explode("\n", $Responce);
+        $data = array();
 
         foreach ($lines as $v) {
             if (!empty($v)) {
