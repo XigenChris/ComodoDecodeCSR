@@ -7,6 +7,9 @@ before_commands:
     - 'composer install --no-interaction --no-scripts'
 
 build:
+    environment:
+        php:
+            version: 5.6
     tests:
         override:
             -
