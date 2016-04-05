@@ -2,7 +2,7 @@
 A simple PHP library to assist with passing a DVC check by comodo. It uses a API
 Endpoint documented [here](https://goo.gl/pZOWhL)
 to get the MD5 & SHA1 hashes. It can then check that these are installed on a
-domain by requesting http://yourdomain.com/<Upper case value of MD5 hash of CSR>.txt.
+domain by requesting http://yourdomain.com/(MD5Hash).txt.
 
 For more infomation about Domain Control Validation read [this](https://goo.gl/7jDJWW)
 
