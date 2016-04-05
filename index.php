@@ -9,7 +9,7 @@ $ComodoDecodeCSR = new ComodoDecodeCSR();
 $csr = file_get_contents('certificate/test.csr');
 $ComodoDecodeCSR->setCSR($csr);
 
-$Hashes = $ComodoDecodeCSR->getHashes();
+$Hashes = $ComodoDecodeCSR->fetchHashes();
 $decodeCSR = $ComodoDecodeCSR->checkInstalled();
 var_dump($decodeCSR);
 /*

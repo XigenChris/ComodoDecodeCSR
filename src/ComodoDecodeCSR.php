@@ -8,9 +8,13 @@ use GuzzleHttp\Client;
 
 class ComodoDecodeCSR
 {
-    protected $md5;
-    protected $sha1;
+    use Traits\ComodoDecodeCSR\Getters;
+    use Traits\ComodoDecodeCSR\Setters;
+
+    protected $MD5;
+    protected $SHA1;
     protected $Endpoint = "https://secure.comodo.net/products/!decodeCSR";
+    protected $CSR;
     protected $Form = [
         'responseFormat' => 'N',
         'showErrorCodes' => 'N',
@@ -28,27 +32,9 @@ class ComodoDecodeCSR
         'product' => '',
         'countryNameType' => 'TWOCHAR'
     ];
-    protected $CSR;
     private $request;
 
-    public function setCSR($CSR)
-    {
-        //TODO Check that this is a valid CSR
-        $this->CSR = $CSR;
-        $this->Form['csr'] = $CSR;
-    }
-
-    public function getCSR()
-    {
-        return $this->CSR;
-    }
-
-    public function getmd5()
-    {
-        return $this->md5;
-    }
-
-    public function getHashes()
+    public function fetchHashes()
     {
         $client = new Client();
 
@@ -62,8 +48,8 @@ class ComodoDecodeCSR
     public function checkInstalled()
     {
         $CSRInfo = $this->decodeCSR();
-        $Domain = $CSRInfo['subject']['CN'];
-        $URL = 'http://' . $Domain . "/" . $this->getmd5() . '.txt';
+        $domain = $CSRInfo['subject']['CN'];
+        $URL = 'http://' . $domain . "/" . $this->getmd5() . '.txt';
 
         $client = new Client();
 
@@ -74,7 +60,7 @@ class ComodoDecodeCSR
 
     public function generateDVC()
     {
-        $DVC = $this->sha1 . "\n";
+        $DVC = $this->getSHA1() . "\n";
         $DVC .= "comodoca.com\n";
 
         return $DVC;
@@ -82,21 +68,21 @@ class ComodoDecodeCSR
 
     private function decodeCSR()
     {
-        $cert_data = openssl_csr_get_public_key($this->getCSR());
-        $cert_details = openssl_pkey_get_details($cert_data);
-        $cert_key = $cert_details['key'];
-        $cert_subject = openssl_csr_get_subject($this->getCSR());
+        $data = openssl_csr_get_public_key($this->getCSR());
+        $details = openssl_pkey_get_details($data);
+        $key = $details['key'];
+        $subject = openssl_csr_get_subject($this->getCSR());
 
         return array(
-            "subject" => $cert_subject,
-            "key" => $cert_key
+            "subject" => $subject,
+            "key" => $key
         );
     }
 
     private function processResponce()
     {
-        $Responce = $this->request->getBody();
-        $lines = explode("\n", $Responce);
+        $responce = $this->request->getBody();
+        $lines = explode("\n", $responce);
         $data = array();
 
         foreach ($lines as $v) {
@@ -106,8 +92,8 @@ class ComodoDecodeCSR
             }
         }
 
-        $this->md5 = $data["md5"];
-        $this->sha1 = $data["sha1"];
+        $this->setMD5($data["md5"]);
+        $this->setSHA1($data["sha1"]);
 
         return $data ? $data : false;
     }
