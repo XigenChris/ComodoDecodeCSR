@@ -84,6 +84,9 @@ class ComodoDecodeCSR
         $responce = $this->request->getBody();
         $lines = explode("\n", $responce);
         $data = array();
+        //Remove the first array as we don't need the SAN and can cause problems
+        //with a multi domain SAN
+        unset($lines[0]);
 
         foreach ($lines as $v) {
             if (!empty($v)) {
