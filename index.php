@@ -10,7 +10,8 @@ $csr = file_get_contents('certificate/test.csr');
 $ComodoDecodeCSR->setCSR($csr);
 
 $Hashes = $ComodoDecodeCSR->getHashes();
-var_dump($Hashes);
+$decodeCSR = $ComodoDecodeCSR->checkInstalled();
+var_dump($decodeCSR);
 /*
 array(2) {
   'md5' =>

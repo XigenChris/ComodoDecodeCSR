@@ -43,6 +43,11 @@ class ComodoDecodeCSR
         return $this->CSR;
     }
 
+    public function getmd5()
+    {
+        return $this->md5;
+    }
+
     public function getHashes()
     {
         $client = new Client();
@@ -52,6 +57,40 @@ class ComodoDecodeCSR
         ]);
 
         return $this->processResponce();
+    }
+
+    public function checkInstalled()
+    {
+        $CSRInfo = $this->decodeCSR();
+        $Domain = $CSRInfo['subject']['CN'];
+        $URL = 'http://' . $Domain . "/" . $this->getmd5() . '.txt';
+
+        $client = new Client();
+
+        $request = $client->request('GET', $URL);
+        $responce = "" . $request->getBody();
+        return ($responce === $this->generateDVC());
+    }
+
+    public function generateDVC()
+    {
+        $DVC = $this->sha1 . "\n";
+        $DVC .= "comodoca.com\n";
+
+        return $DVC;
+    }
+
+    private function decodeCSR()
+    {
+        $cert_data = openssl_csr_get_public_key($this->getCSR());
+        $cert_details = openssl_pkey_get_details($cert_data);
+        $cert_key = $cert_details['key'];
+        $cert_subject = openssl_csr_get_subject($this->getCSR());
+
+        return array(
+            "subject" => $cert_subject,
+            "key" => $cert_key
+        );
     }
 
     private function processResponce()
