@@ -11,7 +11,7 @@ Installation is done via composer:
 `composer require xigen/comodo-decode-csr`
 
 # Requirements
-Bewlow is a list of requirements. There are unit tests to check compatibility with the diffrent PHP versions.
+Below is a list of requirements. There are unit tests to check compatibility with the diffrent PHP versions.
 
 - PHP 5.5+ (Tested 5.5, 5.6, 7 & HHVM)
 - [Guzzle](https://github.com/guzzle/guzzle) 6.X
