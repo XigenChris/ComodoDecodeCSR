@@ -37,4 +37,14 @@ class ComodoDecodeCSRTest extends XigenUnit
         $this->assertSame($this->validMD5, $Hashes["md5"], "md5 didn't match the correct value");
         $this->assertSame($this->validSHA1, $Hashes["sha1"], "sha1 didn't match the correct value");
     }
+
+    public function testCheckingInstalled()
+    {
+        $csr = $this->loadTestCSR();
+        $this->ComodoDecodeCSR->setCSR($csr);
+        $Hashes = $this->ComodoDecodeCSR->getHashes();
+        $Installed = $this->ComodoDecodeCSR->checkInstalled();
+
+        $this->assertTrue($Installed);
+    }
 }
