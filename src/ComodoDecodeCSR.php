@@ -38,7 +38,7 @@ class ComodoDecodeCSR
     {
         $client = new Client();
 
-        $this->request = $client->request('POST', $this->Endpoint, [
+        $this->request = $client->request('POST', $this->getEndpoint(), [
             'form_params' => $this->Form
         ]);
 
