@@ -8,8 +8,8 @@ use Xigen\ComodoDecodeCSR;
 
 class ComodoDecodeCSRTest extends XigenUnit
 {
-    private $validMD5 = "244A9E11A76D297F0816A92F477DF543";
-    private $validSHA1 = "8FC930D6EDE2844D9DA147F9928178AEFB5B7E89";
+    private $validMD5 = "98EB197EF83F7A9EB736ED7CEBD413CE";
+    private $validSHA1 = "DA9C72B6F6BCB05772BF8543E19D1A41B0210E84";
 
     public function setUp()
     {
