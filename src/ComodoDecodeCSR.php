@@ -65,8 +65,8 @@ class ComodoDecodeCSR
             return false;
         }
 
-        $response = "" . $request->getBody();
-        return $this->checkDVC($response);
+        $responce = "" . $request->getBody();
+        return ($responce === $this->generateDVC());
     }
 
     public function generateDVC()
