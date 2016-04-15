@@ -10,6 +10,7 @@
 namespace Xigen;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 class ComodoDecodeCSR
 {
@@ -63,7 +64,7 @@ class ComodoDecodeCSR
         } catch (ClientException $e) {
             return false;
         }
-        
+
         $responce = "" . $request->getBody();
         return ($responce === $this->generateDVC());
     }
