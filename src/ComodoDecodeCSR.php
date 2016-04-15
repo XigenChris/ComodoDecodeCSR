@@ -58,7 +58,12 @@ class ComodoDecodeCSR
 
         $client = new Client();
 
-        $request = $client->request('GET', $URL);
+        try {
+            $request = $client->request('GET', $URL);
+        } catch (ClientException $e) {
+            return false;
+        }
+        
         $responce = "" . $request->getBody();
         return ($responce === $this->generateDVC());
     }
