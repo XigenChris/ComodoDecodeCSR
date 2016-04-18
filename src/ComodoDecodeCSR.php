@@ -48,7 +48,7 @@ class ComodoDecodeCSR
             'form_params' => $this->Form
         ]);
 
-        return $this->processResponce();
+        return $this->processResponse();
     }
 
     public function checkInstalled()
@@ -65,8 +65,8 @@ class ComodoDecodeCSR
             return false;
         }
 
-        $responce = "" . $request->getBody();
-        return $this->checkDVC($responce);
+        $response = "" . $request->getBody();
+        return $this->checkDVC($response);
     }
 
     public function generateDVC()
@@ -77,23 +77,23 @@ class ComodoDecodeCSR
         return $DVC;
     }
 
-    public function checkDVC($responce)
+    public function checkDVC($response)
     {
         $DVC = $this->generateDVC();
 
-        //If the responce matches the DVC value return true
-        if ($responce === $DVC) {
+        //If the response matches the DVC value return true
+        if ($response === $DVC) {
             return true;
         }
 
         //Check if last character is not a new line
-        if (substr($responce, -1) !== "\n") {
+        if (substr($response, -1) !== "\n") {
             //Add said new line
-            $responce = $responce . "\n";
+            $response = $response . "\n";
         }
 
         //Check it again
-        if ($responce === $DVC) {
+        if ($response === $DVC) {
             return true;
         }
 
@@ -113,10 +113,10 @@ class ComodoDecodeCSR
         );
     }
 
-    private function processResponce()
+    private function processResponse()
     {
-        $responce = $this->request->getBody();
-        $lines = explode("\n", $responce);
+        $response = $this->request->getBody();
+        $lines = explode("\n", $response);
         $data = array();
         //Remove the first array as we don't need the SAN and can cause problems
         //with a multi domain SAN
