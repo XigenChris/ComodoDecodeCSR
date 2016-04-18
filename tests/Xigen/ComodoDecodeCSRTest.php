@@ -13,9 +13,8 @@ use Xigen\ComodoDecodeCSR;
 
 class ComodoDecodeCSRTest extends XigenUnit
 {
-    private $validMD5 = "98EB197EF83F7A9EB736ED7CEBD413CE";
-    private $validSHA1 = "DA9C72B6F6BCB05772BF8543E19D1A41B0210E84";
-
+    protected $ComodoDecodeCSR;
+    
     public function setUp()
     {
         $this->ComodoDecodeCSR = new ComodoDecodeCSR();
