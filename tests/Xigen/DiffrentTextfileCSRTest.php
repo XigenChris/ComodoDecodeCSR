@@ -23,45 +23,45 @@ class DiffrentTextfileCSRTest extends XigenUnit
         $this->Hashes = $this->ComodoDecodeCSR->fetchHashes();
     }
 
-    private function checkResponce($responce)
+    private function checkresponse($response)
     {
-        return $this->ComodoDecodeCSR->checkDVC($responce);
+        return $this->ComodoDecodeCSR->checkDVC($response);
     }
 
-    public function testWithEmptyResponce()
+    public function testWithEmptyresponse()
     {
-        $responce = "";
-        $test = $this->checkResponce($responce);
+        $response = "";
+        $test = $this->checkresponse($response);
         $this->assertFalse($test);
     }
 
     public function testWithTrailingReturn()
     {
-        $responce = "\n";
-        $test = $this->checkResponce($responce);
+        $response = "\n";
+        $test = $this->checkresponse($response);
         $this->assertFalse($test);
     }
 
     public function testWithJustSH1()
     {
-        $responce = $this->validSHA1 . "\n";
-        $test = $this->checkResponce($responce);
+        $response = $this->validSHA1 . "\n";
+        $test = $this->checkresponse($response);
         $this->assertFalse($test);
     }
 
     public function testWithSH1AndComdoText()
     {
-        $responce = $this->validSHA1 . "\n";
-        $responce .= "comodoca.com\n";
-        $test = $this->checkResponce($responce);
+        $response = $this->validSHA1 . "\n";
+        $response .= "comodoca.com\n";
+        $test = $this->checkresponse($response);
         $this->assertTrue($test);
     }
 
     public function testWithSH1AndComdoTextNoTrailingReturn()
     {
-        $responce = $this->validSHA1 . "\n";
-        $responce .= "comodoca.com";
-        $test = $this->checkResponce($responce);
+        $response = $this->validSHA1 . "\n";
+        $response .= "comodoca.com";
+        $test = $this->checkresponse($response);
         $this->assertTrue($test);
     }
 }
