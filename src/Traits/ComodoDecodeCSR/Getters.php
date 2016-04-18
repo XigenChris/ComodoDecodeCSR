@@ -26,6 +26,12 @@ trait Getters
         return $this->Endpoint;
     }
 
+    public function getCN()
+    {
+        $CSRInfo = $this->decodeCSR();
+        return $CSRInfo['subject']['CN'];
+    }
+
     public function getCSR()
     {
         return $this->CSR;

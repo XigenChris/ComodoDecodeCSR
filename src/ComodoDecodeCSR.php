@@ -53,8 +53,7 @@ class ComodoDecodeCSR
 
     public function checkInstalled()
     {
-        $CSRInfo = $this->decodeCSR();
-        $domain = $CSRInfo['subject']['CN'];
+        $domain = $this->getCN();
         $URL = 'http://' . $domain . "/" . $this->getmd5() . '.txt';
 
         $client = new Client();
