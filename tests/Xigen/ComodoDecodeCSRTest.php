@@ -14,10 +14,29 @@ use Xigen\ComodoDecodeCSR;
 class ComodoDecodeCSRTest extends XigenUnit
 {
     protected $ComodoDecodeCSR;
-    
+
     public function setUp()
     {
         $this->ComodoDecodeCSR = new ComodoDecodeCSR();
+    }
+
+    private function createFakeCSR()
+    {
+        $dn = array(
+            "countryName" => "NA",
+            "stateOrProvinceName" => "NA",
+            "localityName" => "NA",
+            "organizationName" => "NA",
+            "organizationalUnitName" => "NA",
+            "commonName" => "httpbin.org",
+            "emailAddress" => "NA"
+        );
+
+        // Generate a new private (and public) key pair
+        $privkey = openssl_pkey_new();
+
+        // Generate a certificate signing request
+        return openssl_csr_new($dn, $privkey);
     }
 
     public function testSettingCSR()
@@ -60,5 +79,15 @@ class ComodoDecodeCSRTest extends XigenUnit
         $Installed = $this->ComodoDecodeCSR->checkInstalled();
 
         $this->assertTrue($Installed);
+    }
+
+    public function testCheckInstalledFail()
+    {
+        $csr = $this->createFakeCSR();
+        $this->ComodoDecodeCSR->setCSR($csr);
+        $this->ComodoDecodeCSR->fetchHashes();
+        $Installed = $this->ComodoDecodeCSR->checkInstalled();
+
+        $this->assertFalse($Installed);
     }
 }
