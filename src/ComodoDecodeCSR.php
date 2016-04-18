@@ -66,7 +66,7 @@ class ComodoDecodeCSR
         }
 
         $responce = "" . $request->getBody();
-        return ($responce === $this->generateDVC());
+        return $this->checkDVC($responce);
     }
 
     public function generateDVC()
@@ -75,6 +75,30 @@ class ComodoDecodeCSR
         $DVC .= "comodoca.com\n";
 
         return $DVC;
+    }
+
+    public function checkDVC($responce)
+    {
+        $DVC = $this->generateDVC();
+
+        //If the responce matches the DVC value return true
+        if($responce === $DVC){
+            return true;
+        }
+
+        //Check if last character is not a new line
+        if (substr($responce, -1) != "\n")
+        {
+            //Add said new line
+            $responce = $responce . "\n";
+        }
+
+        //Check it again
+        if($responce === $DVC){
+            return true;
+        }
+
+        return false;
     }
 
     private function decodeCSR()
