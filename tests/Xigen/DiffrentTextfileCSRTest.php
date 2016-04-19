@@ -64,4 +64,13 @@ class DiffrentTextfileCSRTest extends XigenUnit
         $test = $this->checkresponse($response);
         $this->assertTrue($test);
     }
+
+    public function testWithSH1AndComdoTextAndNewLine()
+    {
+        $response = $this->validSHA1 . "\n";
+        $response .= "comodoca.com\n\n";
+        $test = $this->checkresponse($response);
+        $this->assertTrue($test);
+    }
+
 }
