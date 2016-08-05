@@ -53,12 +53,12 @@ There is also a console application to quickly test a domain. To use it you will
 
 `composer global require xigen/comodo-decode-csr`
 
-Now the command `ComodoDecodeCSR` _should_ be avalible (if not check you path includes `~/.composer/vendor/bin/`). You can now check if a domain will pass the DCV like so:
+Now the command `ComodoDecodeCSR` _should_ be avalible (if not check you path includes `~/.composer/vendor/bin/`). You can now check if a domain will pass the DVC like so:
 
 ```
 ➜ ComodoDecodeCSR check certificate.csr
 Success!
-This domain should pass DCV
+This domain should pass DVC
 ```
 # Licence and Contribution
 This source code is released under the GNU General Public License v3. Contributions

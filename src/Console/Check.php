@@ -20,7 +20,7 @@ class Check extends BaseCommand
     {
         $this
             ->setName("check")
-            ->setDescription("Check if a domain will pass the DCV")
+            ->setDescription("Check if a domain will pass the DVC")
             ->addArgument(
                 'csr',
                 InputArgument::REQUIRED,
@@ -46,7 +46,7 @@ class Check extends BaseCommand
 
         if ($ComodoDecodeCSR->checkInstalled()) {
             $output->writeln('<info>Success!</info>');
-            $output->writeln('This domain should pass DCV');
+            $output->writeln('This domain should pass DVC');
 
             return true;
         }
