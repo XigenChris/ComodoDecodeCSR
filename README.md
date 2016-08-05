@@ -3,7 +3,7 @@
 [![Code Coverage](https://scrutinizer-ci.com/g/XigenChris/ComodoDecodeCSR/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/XigenChris/ComodoDecodeCSR/?branch=master)
 [![Travis CI](https://travis-ci.org/XigenChris/ComodoDecodeCSR.svg?branch=master)](https://travis-ci.org/XigenChris/ComodoDecodeCSR)
 
-A simple PHP library to assist with passing a DVC check by comodo. It uses a API
+A simple PHP library to assist with passing a DVC (Domain Verification Check) check by Comodo. It uses a API
 Endpoint documented [here](https://goo.gl/pZOWhL)
 to get the MD5 & SHA1 hashes. It can then check that these are installed on a
 domain by requesting http://yourdomain.com/(MD5Hash).txt.
@@ -48,6 +48,18 @@ bool(true)
 */
 ```
 
+# Console Application
+There is also a console application to quickly test a domain. To use it you will need to install this globaly via composer:
+
+`composer global require xigen/comodo-decode-csr`
+
+Now the command `ComodoDecodeCSR` _should_ be avalible (if not check you path includes `~/.composer/vendor/bin/`). You can now check if a domain will pass the DCV like so:
+
+```
+➜ ComodoDecodeCSR check certificate.csr
+Success!
+This domain should pass DCV
+```
 # Licence and Contribution
 This source code is released under the GNU General Public License v3. Contributions
 are welcome in the form of pull requests. The code is written to PSR-2 standards.
