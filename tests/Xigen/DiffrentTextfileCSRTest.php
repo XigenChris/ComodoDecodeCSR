@@ -72,5 +72,4 @@ class DiffrentTextfileCSRTest extends XigenUnit
         $test = $this->checkresponse($response);
         $this->assertTrue($test);
     }
-
 }

@@ -85,6 +85,11 @@ class ComodoDecodeCSR
             return true;
         }
 
+        //Check if last 2 characters are new lines
+        if (substr($response, -2) === "\n\n") {
+            $response = substr($response, 0, -2) . "\n";
+        }
+
         //Check if last character is not a new line
         if (substr($response, -1) !== "\n") {
             //Add said new line
