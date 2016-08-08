@@ -64,8 +64,7 @@ class ComodoDecodeCSR
             return false;
         }
 
-        $response = "" . $request->getBody();
-        return $this->checkDVC($response);
+        return $this->checkDVC($request);
     }
 
     public function generateDVC()
@@ -76,28 +75,35 @@ class ComodoDecodeCSR
         return $DVC;
     }
 
-    public function checkDVC($response)
+    /**
+     *
+     * @param  GuzzleHttp\Psr7\Request $request
+     * @return bool
+     */
+    public function checkDVC($request)
     {
+        $body = $request->getBody() . '';
+
         $DVC = $this->generateDVC();
 
         //If the response matches the DVC value return true
-        if ($response === $DVC) {
+        if ($body === $DVC) {
             return true;
         }
 
         //Check if last 2 characters are new lines
-        if (substr($response, -2) === "\n\n") {
-            $response = substr($response, 0, -2) . "\n";
+        if (substr($body, -2) === "\n\n") {
+            $body = substr($body, 0, -2) . "\n";
         }
 
         //Check if last character is not a new line
-        if (substr($response, -1) !== "\n") {
+        if (substr($body, -1) !== "\n") {
             //Add said new line
-            $response = $response . "\n";
+            $body = $body . "\n";
         }
 
         //Check it again
-        if ($response === $DVC) {
+        if ($body === $DVC) {
             return true;
         }
 
