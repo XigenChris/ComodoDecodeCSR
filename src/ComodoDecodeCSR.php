@@ -11,6 +11,7 @@ namespace Xigen;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Response;
 
 class ComodoDecodeCSR
 {
@@ -21,6 +22,11 @@ class ComodoDecodeCSR
     protected $SHA1;
     protected $Endpoint = "https://secure.comodo.net/products/!decodeCSR";
     protected $CSR;
+    /**
+     * An array of warnings that can be show after the test
+     * @var array
+     */
+    protected $warnings = [];
     protected $Form = [
         'responseFormat' => 'N',
         'showErrorCodes' => 'N',
@@ -40,6 +46,15 @@ class ComodoDecodeCSR
     ];
     private $request;
 
+    protected function addWarning($code, $message)
+    {
+        $this->warnings[] = [
+            $code => $message
+        ];
+
+        return $this;
+    }
+
     public function fetchHashes()
     {
         $client = new Client();
@@ -56,15 +71,15 @@ class ComodoDecodeCSR
         $domain = $this->getCN();
         $URL = 'http://' . $domain . "/" . $this->getmd5() . '.txt';
 
-        $client = new Client();
+        $client = new Client(['allow_redirects' => false]);
 
         try {
-            $request = $client->request('GET', $URL);
+            $response = $client->request('GET', $URL);
         } catch (ClientException $e) {
             return false;
         }
 
-        return $this->checkDVC($request);
+        return $this->checkDVC($response);
     }
 
     public function generateDVC()
@@ -77,13 +92,12 @@ class ComodoDecodeCSR
 
     /**
      *
-     * @param  GuzzleHttp\Psr7\Request $request
+     * @param  GuzzleHttp\Psr7\Response $response
      * @return bool
      */
-    public function checkDVC($request)
+    public function checkDVC(Response $response)
     {
-        $body = $request->getBody() . '';
-
+        $body = $response->getBody() . '';
         $DVC = $this->generateDVC();
 
         //If the response matches the DVC value return true
