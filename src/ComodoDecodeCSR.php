@@ -14,8 +14,7 @@ use GuzzleHttp\Exception\ClientException;
 
 class ComodoDecodeCSR
 {
-    use Traits\ComodoDecodeCSR\Getters;
-    use Traits\ComodoDecodeCSR\Setters;
+    use Traits\GetSetUnset;
 
     protected $MD5;
     protected $SHA1;
@@ -40,6 +39,19 @@ class ComodoDecodeCSR
     ];
     private $request;
 
+    public function getCN()
+    {
+        $CSRInfo = $this->decodeCSR();
+        return $CSRInfo['subject']['CN'];
+    }
+
+    public function setCSR($CSR)
+    {
+        //TODO Check that this is a valid CSR
+        $this->CSR = $CSR;
+        $this->Form['csr'] = $CSR;
+    }
+
     public function fetchHashes()
     {
         $client = new Client();
@@ -54,7 +66,7 @@ class ComodoDecodeCSR
     public function checkInstalled()
     {
         $domain = $this->getCN();
-        $URL = 'http://' . $domain . "/" . $this->getmd5() . '.txt';
+        $URL = 'http://' . $domain . "/" . $this->getMD5() . '.txt';
 
         $client = new Client();
 
