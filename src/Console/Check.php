@@ -38,11 +38,11 @@ class Check extends BaseCommand
         if ($comodoDecodeCSR->checkInstalled()) {
             $output->writeln('<info>Success!</info> This domain should pass DVC');
 
-            return true;
+            return 2;
         }
 
         $output->writeln('<error>Fail!</error> There is something wrong with the validation file');
 
-        return false;
+        return 0;
     }
 }
