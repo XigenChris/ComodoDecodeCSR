@@ -31,24 +31,14 @@ class Hashes extends BaseCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $csrFile = $input->getArgument('csr');
-        if (!file_exists($csrFile)) {
-            $output->writeln('<error>Unable to load '. $csrFile .'</error>');
-            $output->writeln('<error>Please check the path and try again</error>');
-
-            return 1;
-        }
-
-        $csr = file_get_contents($csrFile);
-
         $comodoDecodeCSR = new ComodoDecodeCSR();
-        $comodoDecodeCSR->setCSR($csr);
+        $comodoDecodeCSR->setCSR($this->loadCSR($input, $output));
         $hashes = $comodoDecodeCSR->fetchHashes();
 
         if ($hashes) {
             $output->writeln('<info>MD5</info> ' . $hashes['md5']);
             $output->writeln('<info>SHA1</info> ' . $hashes['sha1']);
-            
+
             return 0;
         }
 

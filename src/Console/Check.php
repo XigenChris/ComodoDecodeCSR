@@ -31,20 +31,11 @@ class Check extends BaseCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $csrFile = $input->getArgument('csr');
-        if (!file_exists($csrFile)) {
-            $output->writeln('<error>Unable to load '. $csrFile .'</error>');
-            $output->writeln('<error>Please check the path and try again</error>');
-            return false;
-        }
+        $comodoDecodeCSR = new ComodoDecodeCSR();
+        $comodoDecodeCSR->setCSR($this->loadCSR($input, $output));
+        $comodoDecodeCSR->fetchHashes();
 
-        $csr = file_get_contents($csrFile);
-
-        $ComodoDecodeCSR = new ComodoDecodeCSR();
-        $ComodoDecodeCSR->setCSR($csr);
-        $ComodoDecodeCSR->fetchHashes();
-
-        if ($ComodoDecodeCSR->checkInstalled()) {
+        if ($comodoDecodeCSR->checkInstalled()) {
             $output->writeln('<info>Success!</info> This domain should pass DVC');
 
             return true;
