@@ -51,8 +51,6 @@ class ComodoDecodeCSR
         $this->warnings[] = [
             $code => $message
         ];
-
-        return $this;
     }
 
     public function fetchHashes()
@@ -69,9 +67,10 @@ class ComodoDecodeCSR
     public function checkInstalled()
     {
         $domain = $this->getCN();
+        //We do most of our DVC over http:// unless the site is fully SSL
         $URL = 'http://' . $domain . "/" . $this->getmd5() . '.txt';
 
-        $client = new Client(['allow_redirects' => false]);
+        $client = new Client(['allow_redirects' => false, 'verify' => false]);
 
         try {
             $response = $client->request('GET', $URL);
@@ -99,6 +98,14 @@ class ComodoDecodeCSR
     {
         $body = $response->getBody() . '';
         $DVC = $this->generateDVC();
+
+        //Check if we received a 301 or 302 redirect
+        if ($response->getStatusCode() === 301 || $response->getStatusCode() == 301) {
+            $message = 'There is a redirect inplace. Make sure that its not redirecting to https://';
+            $this->addWarning(301, $message);
+
+            return false;
+        }
 
         //If the response matches the DVC value return true
         if ($body === $DVC) {
