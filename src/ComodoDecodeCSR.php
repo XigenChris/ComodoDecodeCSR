@@ -11,6 +11,7 @@ namespace Xigen;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Response;
 
 class ComodoDecodeCSR
 {
@@ -20,6 +21,11 @@ class ComodoDecodeCSR
     protected $SHA1;
     protected $Endpoint = "https://secure.comodo.net/products/!decodeCSR";
     protected $CSR;
+    /**
+     * An array of warnings that can be show after the test
+     * @var array
+     */
+    protected $warnings = [];
     protected $Form = [
         'responseFormat' => 'N',
         'showErrorCodes' => 'N',
@@ -52,6 +58,13 @@ class ComodoDecodeCSR
         $this->Form['csr'] = $CSR;
     }
 
+    protected function addWarning($code, $message)
+    {
+        $this->warnings[] = [
+            $code => $message
+        ];
+    }
+
     public function fetchHashes()
     {
         $client = new Client();
@@ -66,17 +79,17 @@ class ComodoDecodeCSR
     public function checkInstalled()
     {
         $domain = $this->getCN();
+        //We do most of our DVC over http:// unless the site is fully SSL
         $URL = 'http://' . $domain . "/" . $this->getMD5() . '.txt';
 
-        $client = new Client();
+        $client = new Client(['allow_redirects' => false, 'verify' => false]);
 
         try {
-            $request = $client->request('GET', $URL);
+            $response = $client->request('GET', $URL);
         } catch (ClientException $e) {
             return false;
         }
 
-        $response = "" . $request->getBody();
         return $this->checkDVC($response);
     }
 
@@ -88,28 +101,42 @@ class ComodoDecodeCSR
         return $DVC;
     }
 
-    public function checkDVC($response)
+    /**
+     *
+     * @param  GuzzleHttp\Psr7\Response $response
+     * @return bool
+     */
+    public function checkDVC(Response $response)
     {
+        $body = $response->getBody() . '';
         $DVC = $this->generateDVC();
 
+        //Check if we received a 301 or 302 redirect
+        if ($response->getStatusCode() === 301 || $response->getStatusCode() == 301) {
+            $message = 'There is a redirect inplace. Make sure that its not redirecting to https://';
+            $this->addWarning(301, $message);
+
+            return false;
+        }
+
         //If the response matches the DVC value return true
-        if ($response === $DVC) {
+        if ($body === $DVC) {
             return true;
         }
 
         //Check if last 2 characters are new lines
-        if (substr($response, -2) === "\n\n") {
-            $response = substr($response, 0, -2) . "\n";
+        if (substr($body, -2) === "\n\n") {
+            $body = substr($body, 0, -2) . "\n";
         }
 
         //Check if last character is not a new line
-        if (substr($response, -1) !== "\n") {
+        if (substr($body, -1) !== "\n") {
             //Add said new line
-            $response = $response . "\n";
+            $body = $body . "\n";
         }
 
         //Check it again
-        if ($response === $DVC) {
+        if ($body === $DVC) {
             return true;
         }
 
