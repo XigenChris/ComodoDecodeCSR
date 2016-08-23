@@ -51,11 +51,12 @@ class ComodoDecodeCSR
         return $CSRInfo['subject']['CN'];
     }
 
-    public function setCSR($CSR)
+    public function setCSR($csr)
     {
-        //TODO Check that this is a valid CSR
-        $this->CSR = $CSR;
-        $this->Form['csr'] = $CSR;
+        $this->CSR = $csr;
+        //Check that this is a valid CSR
+        $this->decodeCSR();
+        $this->Form['csr'] = $csr;
     }
 
     protected function addWarning($code, $message)
@@ -78,14 +79,18 @@ class ComodoDecodeCSR
 
     public function checkInstalled()
     {
-        $domain = $this->getCN();
+        try {
+            $domain = $this->getCN();
+        } catch (\Exception $e) {
+            return false;
+        }
         //We do most of our DVC over http:// unless the site is fully SSL
-        $URL = 'http://' . $domain . "/" . $this->getMD5() . '.txt';
+        $url = 'http://' . $domain . "/" . $this->getMD5() . '.txt';
 
         $client = new Client(['allow_redirects' => false, 'verify' => false]);
 
         try {
-            $response = $client->request('GET', $URL);
+            $response = $client->request('GET', $url);
         } catch (ClientException $e) {
             return false;
         }
@@ -145,10 +150,14 @@ class ComodoDecodeCSR
 
     private function decodeCSR()
     {
-        $data = openssl_csr_get_public_key($this->getCSR());
-        $details = openssl_pkey_get_details($data);
-        $key = $details['key'];
-        $subject = openssl_csr_get_subject($this->getCSR());
+        try {
+            $data = openssl_csr_get_public_key($this->getCSR());
+            $details = openssl_pkey_get_details($data);
+            $key = $details['key'];
+            $subject = openssl_csr_get_subject($this->getCSR());
+        } catch (\Exception $e) {
+            throw new Exception("Invalid CSR");
+        }
 
         return array(
             "subject" => $subject,

@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 use Xigen\ComodoDecodeCSR;
+use Xigen\Exception;
 
 class Check extends BaseCommand
 {
@@ -32,17 +33,25 @@ class Check extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $comodoDecodeCSR = new ComodoDecodeCSR();
-        $comodoDecodeCSR->setCSR($this->loadCSR($input, $output));
-        $comodoDecodeCSR->fetchHashes();
+
+        try {
+            $comodoDecodeCSR->setCSR($this->loadCSR($input, $output));
+            $comodoDecodeCSR->fetchHashes();
+        } catch (Exception $e) {
+            $output->writeln('<error>Error!</error>');
+            $output->writeln('Invalid CSR');
+
+            return 3;
+        }
 
         if ($comodoDecodeCSR->checkInstalled()) {
             $output->writeln('<info>Success!</info> This domain should pass DVC');
 
-            return 2;
+            return 0;
         }
 
         $output->writeln('<error>Fail!</error> There is something wrong with the validation file');
 
-        return 0;
+        return 2;
     }
 }

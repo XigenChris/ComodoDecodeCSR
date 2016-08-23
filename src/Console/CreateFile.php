@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 use Xigen\ComodoDecodeCSR;
+use Xigen\Exception;
 
 class CreateFile extends BaseCommand
 {
@@ -32,7 +33,16 @@ class CreateFile extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $comodoDecodeCSR = new ComodoDecodeCSR();
-        $comodoDecodeCSR->setCSR($this->loadCSR($input, $output));
+
+        try {
+            $comodoDecodeCSR->setCSR($this->loadCSR($input, $output));
+        } catch (Exception $e) {
+            $output->writeln('<error>Error!</error>');
+            $output->writeln('Invalid CSR');
+
+            return 3;
+        }
+
         $hashes = $comodoDecodeCSR->fetchHashes();
 
         if (!$hashes) {

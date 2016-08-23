@@ -20,25 +20,6 @@ class ComodoDecodeCSRTest extends XigenUnit
         $this->ComodoDecodeCSR = new ComodoDecodeCSR();
     }
 
-    private function createFakeCSR()
-    {
-        $dn = array(
-            "countryName" => "NA",
-            "stateOrProvinceName" => "NA",
-            "localityName" => "NA",
-            "organizationName" => "NA",
-            "organizationalUnitName" => "NA",
-            "commonName" => "httpbin.org",
-            "emailAddress" => "NA"
-        );
-
-        // Generate a new private (and public) key pair
-        $privkey = openssl_pkey_new();
-
-        // Generate a certificate signing request
-        return openssl_csr_new($dn, $privkey);
-    }
-
     public function testSettingCSR()
     {
         //Load the test CSR
