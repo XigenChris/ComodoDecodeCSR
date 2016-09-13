@@ -45,6 +45,8 @@ class ComodoDecodeCSR
     ];
     private $request;
 
+    private $forceSSL = false;
+
     public function getCN()
     {
         $CSRInfo = $this->decodeCSR();
@@ -79,23 +81,39 @@ class ComodoDecodeCSR
 
     public function checkInstalled()
     {
+
         try {
             $domain = $this->getCN();
         } catch (\Exception $e) {
             return false;
         }
-        //We do most of our DVC over http:// unless the site is fully SSL
-        $url = 'http://' . $domain . "/" . $this->getMD5() . '.txt';
 
-        $client = new Client(['allow_redirects' => false, 'verify' => false]);
-
-        try {
-            $response = $client->request('GET', $url);
-        } catch (ClientException $e) {
+        $response = $this->fetchDVCFile($domain);
+        if ($response == false) {
             return false;
         }
 
-        return $this->checkDVC($response);
+        $check = $this->checkDVC($response);
+        if ($check === true) {
+            return $check;
+        }
+
+        //Try again but this time use https://
+        $this->forceSSL = true;
+
+        $response = $this->fetchDVCFile($domain);
+        if ($response == false) {
+            return false;
+        }
+
+        $check = $this->checkDVC($response);
+        if ($check === true) {
+            //TODO Add a message to say then you will need to select 'HTTPS CSR
+            //Hash'
+            return $check;
+        }
+
+        return false;
     }
 
     public function generateDVC()
@@ -117,10 +135,7 @@ class ComodoDecodeCSR
         $DVC = $this->generateDVC();
 
         //Check if we received a 301 or 302 redirect
-        if ($response->getStatusCode() === 301 || $response->getStatusCode() == 301) {
-            $message = 'There is a redirect inplace. Make sure that its not redirecting to https://';
-            $this->addWarning(301, $message);
-
+        if ($response->getStatusCode() === 301 || $response->getStatusCode() == 302) {
             return false;
         }
 
@@ -139,6 +154,8 @@ class ComodoDecodeCSR
             //Add said new line
             $body = $body . "\n";
         }
+
+        var_dump($body, $DVC);
 
         //Check it again
         if ($body === $DVC) {
@@ -185,5 +202,28 @@ class ComodoDecodeCSR
         $this->setSHA1($data["sha1"]);
 
         return $data ? $data : false;
+    }
+
+    private function fetchDVCFile($domain)
+    {
+        //We do most of our DVC over http:// unless the site is fully SSL
+        $protocol = 'http://';
+
+        if ($this->forceSSL) {
+            $protocol = 'https://';
+        }
+
+        $url = $protocol . $domain . "/" . $this->getMD5() . '.txt';
+
+        $client = new Client(['allow_redirects' => false, 'verify' => false]);
+
+        try {
+            $response = $client->request('GET', $url);
+        } catch (ClientException $e) {
+            var_dump('te', $e);
+            return false;
+        }
+
+        return $response;
     }
 }
