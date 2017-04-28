@@ -18,5 +18,9 @@ use Symfony\Component\Console\Application;
 use Xigen\Console;
 
 $application = new Application('ComodoDecodeCSR', '0.4');
+
 $application->add(new Console\Check());
+$application->add(new Console\Hashes());
+$application->add(new Console\CreateFile());
+
 $application->run();

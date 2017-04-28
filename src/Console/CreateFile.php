@@ -15,17 +15,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Xigen\ComodoDecodeCSR;
 use Xigen\Exception;
 
-class Check extends BaseCommand
+class CreateFile extends BaseCommand
 {
     protected function configure()
     {
         $this
-            ->setName("check")
-            ->setDescription("Check if a domain will pass the DVC")
+            ->setName("createfile")
+            ->setDescription("Creates the file needed for DVC")
             ->addArgument(
                 'csr',
                 InputArgument::REQUIRED,
-                'Location of csr file for this domain'
+                'Location of csr file'
             )
         ;
     }
@@ -36,7 +36,6 @@ class Check extends BaseCommand
 
         try {
             $comodoDecodeCSR->setCSR($this->loadCSR($input, $output));
-            $comodoDecodeCSR->fetchHashes();
         } catch (Exception $e) {
             $output->writeln('<error>Error!</error>');
             $output->writeln('Invalid CSR');
@@ -44,14 +43,20 @@ class Check extends BaseCommand
             return 3;
         }
 
-        if ($comodoDecodeCSR->checkInstalled()) {
-            $output->writeln('<info>Success!</info> This domain should pass DVC');
+        $hashes = $comodoDecodeCSR->fetchHashes();
 
-            return 0;
+        if (!$hashes) {
+            $output->writeln('<error>Fail!</error>');
+            $output->writeln('Unable to fetch hashes');
+
+            return 2;
         }
 
-        $output->writeln('<error>Fail!</error> There is something wrong with the validation file');
+        $output->writeln('<info>Filename:</info> ' . $hashes['md5'] . '.txt');
+        $output->writeln('<info>Contents:</info>');
+        $output->writeln($comodoDecodeCSR->generateDVC());
+        $output->writeln('<info>URL:</info> http://' . $comodoDecodeCSR->getCN() . '/' . $hashes['md5'] . '.txt');
 
-        return 2;
+        return 0;
     }
 }

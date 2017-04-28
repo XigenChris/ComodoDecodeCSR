@@ -11,16 +11,21 @@ namespace Xigen;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Response;
 
 class ComodoDecodeCSR
 {
-    use Traits\ComodoDecodeCSR\Getters;
-    use Traits\ComodoDecodeCSR\Setters;
+    use Traits\GetSetUnset;
 
     protected $MD5;
     protected $SHA1;
     protected $Endpoint = "https://secure.comodo.net/products/!decodeCSR";
     protected $CSR;
+    /**
+     * An array of warnings that can be show after the test
+     * @var array
+     */
+    protected $warnings = [];
     protected $Form = [
         'responseFormat' => 'N',
         'showErrorCodes' => 'N',
@@ -40,6 +45,29 @@ class ComodoDecodeCSR
     ];
     private $request;
 
+    private $forceSSL = false;
+
+    public function getCN()
+    {
+        $CSRInfo = $this->decodeCSR();
+        return $CSRInfo['subject']['CN'];
+    }
+
+    public function setCSR($csr)
+    {
+        $this->CSR = $csr;
+        //Check that this is a valid CSR
+        $this->decodeCSR();
+        $this->Form['csr'] = $csr;
+    }
+
+    protected function addWarning($code, $message)
+    {
+        $this->warnings[] = [
+            $code => $message
+        ];
+    }
+
     public function fetchHashes()
     {
         $client = new Client();
@@ -53,19 +81,39 @@ class ComodoDecodeCSR
 
     public function checkInstalled()
     {
-        $domain = $this->getCN();
-        $URL = 'http://' . $domain . "/" . $this->getmd5() . '.txt';
-
-        $client = new Client();
 
         try {
-            $request = $client->request('GET', $URL);
-        } catch (ClientException $e) {
+            $domain = $this->getCN();
+        } catch (\Exception $e) {
             return false;
         }
 
-        $response = "" . $request->getBody();
-        return $this->checkDVC($response);
+        $response = $this->fetchDVCFile($domain);
+        if ($response == false) {
+            return false;
+        }
+
+        $check = $this->checkDVC($response);
+        if ($check === true) {
+            return $check;
+        }
+
+        //Try again but this time use https://
+        $this->forceSSL = true;
+
+        $response = $this->fetchDVCFile($domain);
+        if ($response == false) {
+            return false;
+        }
+
+        $check = $this->checkDVC($response);
+        if ($check === true) {
+            //TODO Add a message to say then you will need to select 'HTTPS CSR
+            //Hash'
+            return $check;
+        }
+
+        return false;
     }
 
     public function generateDVC()
@@ -76,28 +124,41 @@ class ComodoDecodeCSR
         return $DVC;
     }
 
-    public function checkDVC($response)
+    /**
+     *
+     * @param  GuzzleHttp\Psr7\Response $response
+     * @return bool
+     */
+    public function checkDVC(Response $response)
     {
+        $body = $response->getBody() . '';
         $DVC = $this->generateDVC();
 
+        //Check if we received a 301 or 302 redirect
+        if ($response->getStatusCode() === 301 || $response->getStatusCode() == 302) {
+            return false;
+        }
+
         //If the response matches the DVC value return true
-        if ($response === $DVC) {
+        if ($body === $DVC) {
             return true;
         }
 
         //Check if last 2 characters are new lines
-        if (substr($response, -2) === "\n\n") {
-            $response = substr($response, 0, -2) . "\n";
+        if (substr($body, -2) === "\n\n") {
+            $body = substr($body, 0, -2) . "\n";
         }
 
         //Check if last character is not a new line
-        if (substr($response, -1) !== "\n") {
+        if (substr($body, -1) !== "\n") {
             //Add said new line
-            $response = $response . "\n";
+            $body = $body . "\n";
         }
 
+        var_dump($body, $DVC);
+
         //Check it again
-        if ($response === $DVC) {
+        if ($body === $DVC) {
             return true;
         }
 
@@ -106,10 +167,14 @@ class ComodoDecodeCSR
 
     private function decodeCSR()
     {
-        $data = openssl_csr_get_public_key($this->getCSR());
-        $details = openssl_pkey_get_details($data);
-        $key = $details['key'];
-        $subject = openssl_csr_get_subject($this->getCSR());
+        try {
+            $data = openssl_csr_get_public_key($this->getCSR());
+            $details = openssl_pkey_get_details($data);
+            $key = $details['key'];
+            $subject = openssl_csr_get_subject($this->getCSR());
+        } catch (\Exception $e) {
+            throw new Exception("Invalid CSR");
+        }
 
         return array(
             "subject" => $subject,
@@ -137,5 +202,28 @@ class ComodoDecodeCSR
         $this->setSHA1($data["sha1"]);
 
         return $data ? $data : false;
+    }
+
+    private function fetchDVCFile($domain)
+    {
+        //We do most of our DVC over http:// unless the site is fully SSL
+        $protocol = 'http://';
+
+        if ($this->forceSSL) {
+            $protocol = 'https://';
+        }
+
+        $url = $protocol . $domain . "/" . $this->getMD5() . '.txt';
+
+        $client = new Client(['allow_redirects' => false, 'verify' => false]);
+
+        try {
+            $response = $client->request('GET', $url);
+        } catch (ClientException $e) {
+            var_dump('te', $e);
+            return false;
+        }
+
+        return $response;
     }
 }

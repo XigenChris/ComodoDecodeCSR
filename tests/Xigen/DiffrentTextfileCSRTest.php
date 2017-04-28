@@ -9,6 +9,9 @@
 
 namespace Xigen\Tests;
 
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Response;
+
 use Xigen\ComodoDecodeCSR;
 
 class DiffrentTextfileCSRTest extends XigenUnit
@@ -25,6 +28,8 @@ class DiffrentTextfileCSRTest extends XigenUnit
 
     private function checkresponse($response)
     {
+        $stream = Psr7\stream_for($response);
+        $response = new Response(200, [], $stream);
         return $this->ComodoDecodeCSR->checkDVC($response);
     }
 
